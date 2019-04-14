@@ -18,6 +18,21 @@ const all = (state = initialState.all, action) => {
   }
 };
 
+const byId = (state = initialState.byId, action) => {
+  switch (action.type) {
+      case actionTypes.FETCH_ALL_MOVIES_SUCCESS:
+          return action.payload.byId;
+      case actionTypes.FETCH_MOVIE_SUCCESS:
+          return { ...state, 
+                   [action.payload._id]: action.payload };
+      default:
+          return state;
+  }
+};
+
 export default combineReducers({
-  all
+  all,
+  byId
 });
+
+export const allMovies = ({ movies }) => movies.all.map(id => movies.byId[id]);

@@ -1,5 +1,28 @@
-export const FETCH_ALL_MOVIES = 'FETCH_ALL_MOVIES';
-export const FETCH_ALL_MOVIES_SUCCESS = 'FETCH_ALL_MOVIES_SUCCESS';
-export const FETCH_ALL_MOVIES_FAILED = 'FETCH_ALL_MOVIES_FAILED';
+import { takeLatest, all, call, put } from 'redux-saga/effects';
+import * as actionTypes from './moviesActionTypes';
+import { movieAPI } from '../../../api';
 
-export const DELETE_MOVIE_SUCCESS = 'DELETE_MOVIE_SUCCESS';
+
+function* fetchAllMovies() {
+    try {
+        const movies = yield call(movieAPI.fetchAllMovies);
+        yield put({
+            type: actionTypes.FETCH_ALL_MOVIES_SUCCESS,
+            payload: {
+                all: movies.data,
+                byId: {}
+            }
+        });
+    } catch (error) {
+        yield put({
+            type: actionTypes.FETCH_ALL_MOVIES_FAILED
+        });
+
+    }
+}
+
+export default function* moviessSaga() {
+  yield all([
+      takeLatest(actionTypes.FETCH_ALL_MOVIES, fetchAllMovies),
+  ])
+}
