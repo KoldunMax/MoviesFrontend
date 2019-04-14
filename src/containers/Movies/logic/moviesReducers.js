@@ -2,7 +2,8 @@ import * as actionTypes from './moviesActionTypes';
 import { combineReducers } from 'redux';
 
 const initialState = {
-  all: []
+  all: [],
+  byId: {}
 };
 
 const all = (state = initialState.all, action) => {
@@ -11,7 +12,7 @@ const all = (state = initialState.all, action) => {
           {
               return action.payload.all;
           }
-      case actionTypes.DELETE_MOVIES_SUCCESS:
+      case actionTypes.DELETE_MOVIE_SUCCESS:
           return state.filter(id => id !== action.payload.id);
       default:
           return state;
@@ -19,6 +20,7 @@ const all = (state = initialState.all, action) => {
 };
 
 const byId = (state = initialState.byId, action) => {
+  console.log('byid');
   switch (action.type) {
       case actionTypes.FETCH_ALL_MOVIES_SUCCESS:
           return action.payload.byId;
@@ -35,4 +37,7 @@ export default combineReducers({
   byId
 });
 
-export const allMovies = ({ movies }) => movies.all.map(id => movies.byId[id]);
+export const allMovies = ({ movies }) => {
+  console.log(movies.all.map(id => movies.byId[id]));
+  return movies.all.map(id => movies.byId[id]);
+}

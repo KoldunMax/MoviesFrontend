@@ -4,7 +4,7 @@ import config from '../config';
 class Api {
     constructor() {
         this.adapter = axios.create({
-            baseURL: config.baseURL
+            baseURL: config.SERVER_HOST
         });
 
         this.requestType = {
