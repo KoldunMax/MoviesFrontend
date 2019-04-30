@@ -5,9 +5,9 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 import createStore from '../store';
 import history from '../store/history';
 import Movies from '../containers/Movies/Movies';
+import MovieCreation from '../containers/MovieCreation/MovieCreation';
 
 const store = createStore();
-
 
 class App extends Component {
   render() {
@@ -17,6 +17,7 @@ class App extends Component {
         <Switch>
           <Route path="/" exact render={() => <Redirect to="movies" />} />
           <Route path="/movies" component={Movies} exact />
+          <Route path="/movies/new" component={MovieCreation} exact />
         </Switch>
       </ConnectedRouter>
     </Provider>

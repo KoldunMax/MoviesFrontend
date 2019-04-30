@@ -2,18 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { Container, Image, Grid, Segment } from 'semantic-ui-react';
-import { fetchAllMovies } from './logic/moviesActions';
+import { Container, Grid, Segment, Modal, Button } from 'semantic-ui-react';
+import { fetchAllMovies, deleteMovie, setFilters, setSorting, sendFile } from './logic/moviesActions';
 import { allMovies } from './logic/moviesReducers';
 import MovieList from '../../components/MovieList/MovieList.js';
 import MovieListHeader from '../../components/MovieList/MovieListHeader.js';
-import EmptyMovieList from '../../components/MovieList/EmptyMovieList.js';
 import MovieModal from '../../components/MovieModal/MovieModal.js';
 
 class Movies extends React.Component {
 
   state = {
-    activeMovie: null
+    activeMovie: null,
+    open: false
   }
 
   componentDidMount() {
@@ -27,50 +27,80 @@ class Movies extends React.Component {
   };
 
   handleMovieCreate = () => {
-    // this.props.history.push(`/movies/new`);
-    console.log('creating movie');
+    this.props.history.push(`/movies/new`);
   }
 
   handleDelete = (id) => {
-    // this.props.actions.deleteMovie(id);
-    console.log('deleting movie')
+    this.props.actions.deleteMovie(id);
   }
 
+  closeConfigShow = (closeOnEscape, closeOnDimmerClick, id) => {
+    this.setState({ closeOnEscape, closeOnDimmerClick, open: true, id})
+  }
+
+
+  close = () => this.setState({ open: false })
+
   render() {
-    const { allMovies } = this.props;
-    const { activeMovie } = this.state;
-    console.log(activeMovie);
-    return(
+    const { allMovies, sorted } = this.props;
+    const { activeMovie, open, closeOnEscape, closeOnDimmerClick } = this.state;
+
+    return (
       <Container>
-      <Grid centered columns={1}>
+        <Grid centered columns={1}>
           <Grid.Row>
-              <Grid.Column>
-                  <Segment raised padded textAlign="center">
-                      {!allMovies.length
-                          ? <EmptyMovieList 
-                              onCreate={this.handleMovieCreate} 
-                          />
-                          : <React.Fragment>
-                              <MovieListHeader 
-                                  onCreate={this.handleMovieCreate} 
-                                  listLength={allMovies.length} 
-                              />
-                              <MovieList
-                                  movies={allMovies}
-                                  onView={this.toggleMovieModal} 
-                                  onDelete={this.handleDelete} 
-                              />
-                          </React.Fragment>
-                      }
-                  </Segment>
-              </Grid.Column>
+            <Grid.Column>
+              <Segment raised padded textAlign="center">
+                <React.Fragment>
+                  <MovieListHeader
+                    onCreate={this.handleMovieCreate}
+                    listLength={allMovies.length}
+                    setFilters={this.props.actions.setFilters}
+                    setSorting={this.props.actions.setSorting}
+                    sendFile={this.props.actions.sendFile}
+                    sorted={sorted}
+                  />
+                  <MovieList
+                    movies={allMovies}
+                    onView={this.toggleMovieModal}
+                    closeConfigShow={this.closeConfigShow}
+                  />
+                  <Modal
+                    open={open}
+                    closeOnEscape={closeOnEscape}
+                    closeOnDimmerClick={closeOnDimmerClick}
+                    onClose={this.close}
+                  >
+                    <Modal.Header>Delete the movie</Modal.Header>
+                    <Modal.Content>
+                      <p>Are you sure you want to delete the movie</p>
+                    </Modal.Content>
+                    <Modal.Actions>
+                      <Button onClick={this.close} negative>
+                        No
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          await this.handleDelete(this.state.id)
+                          await this.close()
+                        }}
+                        positive
+                        labelPosition='right'
+                        icon='checkmark'
+                        content='Yes'
+                      />
+                    </Modal.Actions>
+                  </Modal>
+                </React.Fragment>
+              </Segment>
+            </Grid.Column>
           </Grid.Row>
-      </Grid>
-      <MovieModal 
-          movie={activeMovie} 
-          onClose={() => this.toggleMovieModal(null)} 
-      />
-  </Container>
+        </Grid>
+        <MovieModal
+          movie={activeMovie}
+          onClose={() => this.toggleMovieModal(null)}
+        />
+      </Container>
     )
   }
 }
@@ -81,12 +111,13 @@ Movies.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  allMovies: allMovies(state)
+  allMovies: allMovies(state),
+  sorted: state.movies.sorting
 });
 
 
-const mapDispatchToProps =  dispatch => ({
-  actions: bindActionCreators({fetchAllMovies}, dispatch)
+const mapDispatchToProps = dispatch => ({
+  actions: bindActionCreators({ fetchAllMovies, deleteMovie, setFilters, setSorting, sendFile }, dispatch)
 });
 
-export default connect(mapStateToProps,  mapDispatchToProps)(Movies);
+export default connect(mapStateToProps, mapDispatchToProps)(Movies);
